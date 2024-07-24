@@ -26,5 +26,5 @@ export default (req, res) => {
   const uid = data.slice(12, 22);
   const result = message(uid, mess);
 
-  res.status(200).json({ packet: result });
+  res.status(200).json(result);
 };
