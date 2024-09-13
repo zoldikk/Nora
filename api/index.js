@@ -33,6 +33,6 @@ export default function handler(req, res) {
     // بناء الرسالة النهائية
     const packet = mes(id, txt);
 
-    // إرجاع الحزمة كاستجابة JSON
-    res.status(200).json({ packet });
-              }
+    // إرجاع الحزمة كاستجابة نصية
+    res.status(200).send(packet);
+}
