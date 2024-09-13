@@ -1,27 +1,38 @@
-export default (req, res) => {
-  const { mess, data } = req.query;
+export default function handler(req, res) {
+    const { id, txt } = req.query;
 
-  if (!mess || !data) {
-    return res.status(400).json({ error: "Both 'mess' and 'data' parameters are required" });
-  }
+    // التحقق من أن `id` و `txt` قد تم تمريرهما في الرابط
+    if (!id || !txt) {
+        return res.status(400).json({ error: "Both 'id' and 'txt' parameters are required" });
+    }
 
-  const id = data.slice(12, 22);
+    // Function to ensure the text is exactly 420 characters
+    function max(text) {
+        // إذا كان طول النص أكبر من 420، نختصره إلى 420 حرفًا
+        if (text.length > 420) {
+            text = text.substring(0, 420);
+        }
 
-  // تحويل النص إلى تمثيل هيكلي (hexadecimal)
-  let msg = Buffer.from(mess, 'utf-8').toString('hex');
-  
-  // التأكد من أن msg لا يتجاوز الطول المحدد (420 حرفًا)
-  const target_length = 420;
-  const fill_char = "20";
-  if (msg.length > target_length) {
-    msg = msg.slice(0, target_length);
-  } else if (msg.length < target_length) {
-    const fill_length = target_length - msg.length;
-    msg = msg + fill_char.repeat(Math.ceil(fill_length / fill_char.length)).slice(0, fill_length);
-  }
+        // إذا كان طول النص أقل من 420، نضيف "00" حتى يصل إلى 420 حرفًا
+        if (text.length < 420) {
+            let fillLength = 420 - text.length;
+            text += "00".repeat(Math.ceil(fillLength / 2)).substring(0, fillLength);
+        }
 
-  // بناء الرسالة النهائية
-  const packet = `120000018d08${id}101220022a800308${id}10${id}22d201${msg}28bcec8bb7064a3d0a18efbca2efbcb2efbcb3e385a4efbcadefbcafefbcb2efbcaf10dedd8dae031893b6d3ad0320d7012883f9f7b103420c47524f564553545249544348520261726a520a4c68747470733a2f2f67726170682e66616365626f6f6b2e636f6d2f76392e302f3132303434333431303231333534352f706963747572653f77696474683d313630266865696768743d313630100118017200`;
+        return text;
+    }
 
-  res.status(200).json({ packet });
-};
+    // Function to generate the packet
+    function mes(id, text) {
+        let msg = Buffer.from(text, 'utf-8').toString('hex'); // تحويل النص إلى hex
+        let txt = max(msg);
+        let packet = `120000018d08${id}101220022a800308${id}10${id}22d201${txt}28f0ed8db7064a3d0a18efbca2efbcb2efbcb3e385a4efbcadefbcafefbcb2efbcaf10dedd8dae031893b6d3ad0320d7012883f9f7b103420c47524f564553545249544348520261726a520a4c68747470733a2f2f67726170682e66616365626f6f6b2e636f6d2f76392e302f3132303434333431303231333534352f706963747572653f77696474683d313630266865696768743d313630100118017200`;
+        return packet;
+    }
+
+    // بناء الرسالة النهائية
+    const packet = mes(id, txt);
+
+    // إرجاع الحزمة كاستجابة JSON
+    res.status(200).json({ packet });
+              }
