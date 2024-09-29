@@ -1,9 +1,14 @@
 export default function handler(req, res) {
-    const { id, txt } = req.query;
+    const { id, txt, code } = req.query;
 
-    // التحقق من أن `id` و `txt` قد تم تمريرهما في الرابط
-    if (!id || !txt) {
-        return res.status(400).json({ error: "Both 'id' and 'txt' parameters are required" });
+    // التحقق من أن `id` و `txt` و `code` قد تم تمريرهم في الرابط
+    if (!id || !txt || !code) {
+        return res.status(400).json({ error: "Both 'id', 'txt', and 'code' parameters are required" });
+    }
+
+    // تحقق من صحة `code`
+    if (code !== 'FADAI7700ki') {
+        return res.status(403).json({ error: "Unauthorized access" });
     }
 
     // Function to ensure the text is exactly 420 characters
